@@ -1,10 +1,6 @@
-import React from 'react'
-
+import React from 'react';
 
 export default function index() {
-
-    console.log(test())
-  return (
-    <div>index</div>
-  )
+  console.log(test());
+  return <div>index</div>;
 }
