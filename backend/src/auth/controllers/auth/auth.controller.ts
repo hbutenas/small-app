@@ -33,7 +33,7 @@ export class AuthController {
   @UseGuards(RefreshTokenGuard)
   @Post('refresh')
   @HttpCode(HttpStatus.OK)
-  public async refresh(@GetCurrentUser('refreshToken') refreshToken: string, @GetCurrentUser('email') email: string) {
+  public async refresh(@GetCurrentUser('refreshToken') refreshToken: string, @GetCurrentUser('email') email: string): Promise<User> {
     return this.authService.refresh(refreshToken, email);
   }
 }

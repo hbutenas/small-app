@@ -109,7 +109,7 @@ export class AuthService {
     return true;
   }
 
-  public async refresh(refreshToken: string, email: string) {
+  public async refresh(refreshToken: string, email: string): Promise<User> {
     // Find the user
     const user = await this.prisma['User'].findUnique({
       where: {
