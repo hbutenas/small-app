@@ -1,9 +1,10 @@
 import React from 'react';
 
+import Sidebar from '../components/main/Sidebar';
+import ContentContainer from 'components/main/ContentContainer';
+
 const Home = () => {
-  return (
-    <div className="mt-16 text-center text-6xl text-primary">Root Index</div>
-  );
+  return <ContentContainer>This is a test</ContentContainer>;
 };
 
 export default Home;
