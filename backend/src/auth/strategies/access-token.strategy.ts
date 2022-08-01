@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { PassportStrategy } from '@nestjs/passport';
 import { ExtractJwt, Strategy } from 'passport-jwt';
 import { ConfigService } from '@nestjs/config';
+import { User } from '../types';
 
 @Injectable()
 export class AccessTokenJwtStrategy extends PassportStrategy(Strategy, 'jwt') {
@@ -11,8 +12,8 @@ export class AccessTokenJwtStrategy extends PassportStrategy(Strategy, 'jwt') {
       secretOrKey: config.get('ACCESS_TOKEN'),
     });
   }
-  // Todo: create a type for payload
-  validate(payload: any) {
+
+  validate(payload: User) {
     return payload;
   }
 }
