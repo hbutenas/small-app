@@ -2,9 +2,11 @@ import { BadRequestException, Injectable, InternalServerErrorException } from '@
 import { RegisterUserDto } from 'src/auth/dto';
 import { PrismaService } from 'src/prisma/prisma.service';
 import * as bcrypt from 'bcrypt';
+import { JwtService } from '@nestjs/jwt';
+
 @Injectable()
 export class AuthService {
-  constructor(private prisma: PrismaService) {}
+  constructor(private prisma: PrismaService, private jwt: JwtService) {}
 
   public async register(body: RegisterUserDto) {
     // Find user by email
