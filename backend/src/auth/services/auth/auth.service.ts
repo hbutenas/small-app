@@ -1,5 +1,5 @@
 import { BadRequestException, Injectable, InternalServerErrorException } from '@nestjs/common';
-import { RegisterUserDto } from 'src/auth/dto';
+import { RegisterUserDto, LoginUserDto } from 'src/auth/dto';
 import { PrismaService } from 'src/prisma/prisma.service';
 import * as bcrypt from 'bcrypt';
 import { JwtService } from '@nestjs/jwt';
@@ -55,6 +55,58 @@ export class AuthService {
 
     // Return user & tokens
     return { user: userPayload, tokens };
+  }
+
+  public async login(body: LoginUserDto): Promise<User> {
+    // Find user
+    const user = await this.prisma['User'].findUnique({
+      where: {
+        email: body.email.toLowerCase(),
+      },
+    });
+
+    // User does not exists
+    if (!user) throw new BadRequestException('Email address or password is incorrect');
+
+    // Compare passwords
+    const passwordMatches = await bcrypt.compare(body.password, user.password);
+
+    // Passwords does not match
+    if (!passwordMatches) throw new BadRequestException('Email address or password is incorrect');
+
+    // Create payload
+    const userPayload = {
+      id: user.id,
+      email: user.email,
+      username: user.username,
+    };
+
+    // Generate tokens
+    const tokens = await this.generateJwtTokens(userPayload);
+
+    // Update the refreshToken
+    await this.updateRefreshToken(userPayload.email, tokens.refreshToken);
+
+    // Return user & tokens
+    return { user: userPayload, tokens };
+  }
+
+  public async logout(email: string): Promise<boolean> {
+    // Set users refreshToken to null
+    try {
+      await this.prisma['User'].update({
+        where: {
+          email,
+        },
+        data: {
+          refreshToken: null,
+        },
+      });
+    } catch (e) {
+      throw new InternalServerErrorException('Something went wrong while logging out the user... Please try again later');
+    }
+
+    return true;
   }
 
   /** Helpers */
