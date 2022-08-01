@@ -1,4 +1,4 @@
-import { BadRequestException, Injectable, InternalServerErrorException } from '@nestjs/common';
+import { BadRequestException, ForbiddenException, Injectable, InternalServerErrorException } from '@nestjs/common';
 import { RegisterUserDto, LoginUserDto } from 'src/auth/dto';
 import { PrismaService } from 'src/prisma/prisma.service';
 import * as bcrypt from 'bcrypt';
@@ -107,6 +107,40 @@ export class AuthService {
     }
 
     return true;
+  }
+
+  public async refresh(refreshToken: string, email: string) {
+    // Find the user
+    const user = await this.prisma['User'].findUnique({
+      where: {
+        email,
+      },
+    });
+
+    // Couldn't find user or user's refresh token is null
+    if (!user || !user.refreshToken) throw new ForbiddenException('Access denied');
+
+    // Compare refresh token hash
+    const refreshTokenMatches = await bcrypt.compare(refreshToken, user.refreshToken);
+
+    // Tokens does not match
+    if (!refreshTokenMatches) throw new ForbiddenException('Access denied');
+
+    // Create payload
+    const userPayload = {
+      id: user.id,
+      email: user.email,
+      username: user.username,
+    };
+
+    // Generate tokens
+    const tokens = await this.generateJwtTokens(userPayload);
+
+    // Update the refreshToken
+    await this.updateRefreshToken(userPayload.email, tokens.refreshToken);
+
+    // Return user & tokens
+    return { user: userPayload, tokens };
   }
 
   /** Helpers */
