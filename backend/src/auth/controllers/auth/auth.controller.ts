@@ -1,8 +1,8 @@
 import { Body, Controller, HttpCode, HttpStatus, Post, UseGuards } from '@nestjs/common';
-import { GetCurrentUser, Public } from 'src/auth/decorators';
-import { LoginUserDto, RegisterUserDto } from 'src/auth/dto';
-import { RefreshTokenGuard } from 'src/auth/guards';
-import { User } from 'src/auth/types';
+import { GetCurrentUser, Public } from '../../decorators';
+import { LoginUserDto, RegisterUserDto } from '../../dto';
+import { RefreshTokenGuard } from '../../guards';
+import { User } from '../../../auth/types';
 import { AuthService } from '../../services/auth/auth.service';
 
 @Controller('api/v1/auth')
