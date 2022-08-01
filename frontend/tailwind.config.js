@@ -1,18 +1,21 @@
+const colors = require('tailwindcss/colors');
+
 /** @type {import('tailwindcss').Config} */
 module.exports = {
-  content: [
-    './pages/**/*.{js,ts,jsx,tsx}',
-    './components/**/*.{js,ts,jsx,tsx}',
-  ],
+  content: ['./pages/**/*.tsx', './components/**/*.tsx', './shared/**/*.tsx'],
   theme: {
     extend: {
       fontFamily: {
         sans: ['Poppins', 'sans-serif'],
       },
+      container: {
+        center: true,
+        padding: '1rem',
+      },
     },
   },
-  plugins: [require('daisyui')],
+  plugins: [require('@tailwindcss/forms'), require('daisyui')],
   daisyui: {
-    themes: ['dark'],
+    themes: ['light'],
   },
 };
