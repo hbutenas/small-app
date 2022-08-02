@@ -2,9 +2,17 @@ const colors = require('tailwindcss/colors');
 
 /** @type {import('tailwindcss').Config} */
 module.exports = {
-  content: ['./pages/**/*.tsx', './components/**/*.tsx', './shared/**/*.tsx'],
+  content: [
+    './pages/**/*.tsx',
+    './components/**/*.tsx',
+    './shared/**/*.tsx',
+    './layouts/**/*.tsx',
+  ],
   theme: {
     extend: {
+      colors: {
+        danger: colors.rose,
+      },
       fontFamily: {
         sans: ['Poppins', 'sans-serif'],
       },

@@ -33,7 +33,7 @@ const validationSchema = Yup.object().shape({
   password: validate('password'),
 });
 
-const Login: NextPageWithLayout = () => {
+const Register: NextPageWithLayout = () => {
   return (
     <Formik
       validationSchema={validationSchema}
@@ -41,17 +41,17 @@ const Login: NextPageWithLayout = () => {
       onSubmit={() => {}}
     >
       <Form className="space-y-4">
-        <Head title="Login" description="Login" />
+        <Head title="Register" description="Register" />
         <Fields fields={fields} />
-        <Button>Login</Button>
-        <Link href="/register">New Member?</Link>
+        <Button>Register</Button>
+        <Link href="/login">Have an Account?</Link>
       </Form>
     </Formik>
   );
 };
 
-Login.getLayout = (page: ReactElement) => (
-  <AuthLayout heading="Login Now!">{page}</AuthLayout>
+Register.getLayout = (page: ReactElement) => (
+  <AuthLayout heading="Register Now!">{page}</AuthLayout>
 );
 
-export default Login;
+export default Register;

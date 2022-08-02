@@ -9,7 +9,7 @@ type LabelProps = {
 function Label({ children, htmlFor, isRequired = false }: LabelProps) {
   return (
     <label htmlFor={htmlFor} className="text-sm font-medium text-base-content">
-      {children} {isRequired && <span className="text-error">*</span>}
+      {children} {isRequired && <span className="text-danger-700">*</span>}
     </label>
   );
 }
