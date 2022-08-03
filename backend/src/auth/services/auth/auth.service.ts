@@ -59,7 +59,7 @@ export class AuthService {
 
   public async login(body: LoginUserDto): Promise<User> {
     // Find user
-    const user = await this.prisma['User'].findUnique({
+    const user = await this.prisma.user.findUnique({
       where: {
         email: body.email.toLowerCase(),
       },
