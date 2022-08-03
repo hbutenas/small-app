@@ -2,6 +2,7 @@ import { MailerModule } from '@nestjs-modules/mailer';
 import { Global, Module } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { MailService } from './mail.service';
+
 @Global()
 @Module({
   imports: [
@@ -12,8 +13,6 @@ import { MailService } from './mail.service';
           port: config.get('MAIL_PORT'),
           secure: false,
           auth: {
-            // user: 'noemie37@ethereal.email',
-            // pass: 'WdCQAzyfrvZbYmuhw4',
             user: config.get('MAIL_USER'),
             pass: config.get('MAIL_PASS'),
           },
