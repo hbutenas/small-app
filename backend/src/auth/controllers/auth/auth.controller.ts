@@ -3,9 +3,11 @@ import { GetCurrentUser, Public } from 'src/auth/decorators';
 import { ForgotPasswordDto, LoginUserDto, RegisterUserDto } from 'src/auth/dto';
 import { RefreshTokenGuard } from 'src/auth/guards';
 import { User } from 'src/auth/types';
+import { ApiTags } from '@nestjs/swagger';
 import { AuthService } from '../../services/auth/auth.service';
 
-@Controller('api/v1/auth')
+@ApiTags('auth')
+@Controller('auth')
 export class AuthController {
   constructor(private authService: AuthService) {}
 

@@ -1,6 +1,4 @@
-import { Module } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
-import { PrismaService } from '../../../prisma/prisma.service';
 import { AuthController } from './auth.controller';
 
 describe('AuthController', () => {

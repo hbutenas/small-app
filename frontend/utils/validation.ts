@@ -6,6 +6,7 @@ const validationErrors = {
   max: 'This field  must be less than :1 characters long.',
   email: 'This field must be a valid email.',
   matches: 'This field is not valid.',
+  invalidCredentials: 'These credentials do not match our records.',
 };
 
 export const validationError = (
