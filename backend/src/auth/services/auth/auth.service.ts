@@ -1,14 +1,15 @@
-import { BadRequestException, ForbiddenException, Injectable, InternalServerErrorException } from '@nestjs/common';
-import { RegisterUserDto, LoginUserDto } from '../../dto';
+import { BadRequestException, ForbiddenException, Injectable, InternalServerErrorException, NotFoundException } from '@nestjs/common';
+import { RegisterUserDto, LoginUserDto, ForgotPasswordDto } from '../../dto';
 import { PrismaService } from '../../../prisma/prisma.service';
 import * as bcrypt from 'bcrypt';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
 import { TokensType, User, UserPayloadType } from '../../../auth/types';
-
+import * as crypto from 'crypto';
+import { MailService } from 'src/mail/mail.service';
 @Injectable()
 export class AuthService {
-  constructor(private prisma: PrismaService, private jwt: JwtService, private config: ConfigService) {}
+  constructor(private prisma: PrismaService, private jwt: JwtService, private config: ConfigService, private mailService: MailService) {}
 
   public async register(body: RegisterUserDto): Promise<User> {
     // Find user by email
@@ -141,6 +142,42 @@ export class AuthService {
 
     // Return user & tokens
     return { user: userPayload, tokens };
+  }
+
+  public async forgotPassword(body: ForgotPasswordDto) {
+    // Find the user
+    const user = await this.prisma['User'].findUnique({
+      where: {
+        email: body.email,
+      },
+    });
+
+    // Couldn't find the user
+    if (!user) throw new NotFoundException('Email address is invalid');
+
+    // Generate random token for forgot password
+    const token = crypto.randomBytes(10).toString('hex');
+
+    // Hash the token
+    const hashedToken = await this.hashData(token);
+
+    // Save the data
+    try {
+      await this.prisma['ForgotPassword'].create({
+        data: {
+          forgotToken: hashedToken,
+          userEmail: body.email,
+          expiresAt: new Date(+new Date() + 60000 * 10),
+        },
+      });
+    } catch (e) {
+      throw new InternalServerErrorException('Something went wrong while sending forgot email... Please try again later');
+    }
+
+    // Send the email
+    await this.mailService.sendEmail(body.email);
+
+    // Send a response to client
   }
 
   /** Helpers */
