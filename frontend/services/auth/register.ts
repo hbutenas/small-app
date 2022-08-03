@@ -8,7 +8,7 @@ type TData = {
 };
 
 async function register(data: TData) {
-  const resp = await axios.post('/register', data);
+  const resp = await axios.post('/auth/register', data);
   return resp.data;
 }
 

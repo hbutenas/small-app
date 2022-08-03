@@ -1,5 +1,5 @@
 import React, { ReactElement } from 'react';
-import { Formik, Form } from 'formik';
+import { Form, Formik } from 'formik';
 import * as Yup from 'yup';
 
 import { NextPageWithLayout } from './_app';
@@ -11,6 +11,8 @@ import Link from 'components/auth/Link';
 import validate from 'utils/validation';
 import Head from 'shared/custom/Head';
 import useRegister from 'services/auth/register';
+import { AxiosError } from 'axios';
+import { useRouter } from 'next/router';
 
 const fields: TField[] = [
   {
@@ -47,13 +49,25 @@ const validationSchema = Yup.object().shape({
 
 const Register: NextPageWithLayout = () => {
   const { mutate: register, isLoading } = useRegister();
+  const router = useRouter();
 
   return (
     <Formik
       validationSchema={validationSchema}
       initialValues={{ email: '', password: '', passwordConfirmation: '' }}
-      onSubmit={(values) => {
-        register(values);
+      onSubmit={(values, { setErrors }) => {
+        register(values, {
+          onSuccess: () => {
+            //    Todo setUser
+            router.push('/');
+          },
+          onError: (error) => {
+            const e = error as AxiosError;
+            if (e.response?.status === 400) {
+              setErrors(e.response.data as object);
+            }
+          },
+        });
       }}
     >
       <Form className="space-y-4">

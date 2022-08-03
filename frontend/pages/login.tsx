@@ -1,15 +1,18 @@
 import React, { ReactElement } from 'react';
-import { Formik, Form } from 'formik';
+import { Form, Formik } from 'formik';
 import * as Yup from 'yup';
 
 import { NextPageWithLayout } from './_app';
 import { TField } from 'types';
 import { Fields } from 'shared/form';
+import { AxiosError } from 'axios';
 import AuthLayout from 'layouts/AuthLayout';
 import Button from 'components/auth/Button';
 import Link from 'components/auth/Link';
 import validate from 'utils/validation';
 import Head from 'shared/custom/Head';
+import useLogin from '../services/auth/login';
+import { useRouter } from 'next/router';
 
 const fields: TField[] = [
   {
@@ -34,16 +37,34 @@ const validationSchema = Yup.object().shape({
 });
 
 const Login: NextPageWithLayout = () => {
+  const { mutate: login, isLoading } = useLogin();
+  const router = useRouter();
+
   return (
     <Formik
       validationSchema={validationSchema}
       initialValues={{ email: '', password: '' }}
-      onSubmit={() => {}}
+      onSubmit={(values, { setErrors }) => {
+        login(values, {
+          onSuccess: () => {
+            //    Todo setUser
+            router.push('/');
+          },
+          onError: (error) => {
+            const e = error as AxiosError;
+            if (e.response?.status === 422) {
+              setErrors(e.response.data as object);
+            }
+          },
+        });
+      }}
     >
       <Form className="space-y-4">
         <Head title="Login" description="Login" />
         <Fields fields={fields} />
-        <Button>Login</Button>
+        <Button isLoading={isLoading} disabled={isLoading}>
+          Login
+        </Button>
         <Link href="/register">New Member?</Link>
       </Form>
     </Formik>

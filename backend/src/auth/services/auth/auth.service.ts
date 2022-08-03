@@ -1,4 +1,4 @@
-import { BadRequestException, ForbiddenException, Injectable, InternalServerErrorException, NotFoundException } from '@nestjs/common';
+import { ForbiddenException, Injectable, InternalServerErrorException, NotFoundException, UnprocessableEntityException } from '@nestjs/common';
 import { RegisterUserDto, LoginUserDto, ForgotPasswordDto } from '../../dto';
 import { PrismaService } from '../../../prisma/prisma.service';
 import * as bcrypt from 'bcrypt';
@@ -21,7 +21,7 @@ export class AuthService {
     });
 
     // User already exists, throw error
-    if (user) throw new BadRequestException(`Email address is taken`);
+    if (user) throw new UnprocessableEntityException({ email: 'Email address is already taken.' });
 
     // Hash the password
     const hashedPassword = await this.hashData(body.password);
@@ -68,13 +68,13 @@ export class AuthService {
     });
 
     // User does not exists
-    if (!user) throw new BadRequestException('Email address or password is incorrect');
+    if (!user) throw new UnprocessableEntityException({ email: 'These credentials do not match our records.' });
 
     // Compare passwords
     const passwordMatches = await bcrypt.compare(body.password, user.password);
 
     // Passwords does not match
-    if (!passwordMatches) throw new BadRequestException('Email address or password is incorrect');
+    if (!passwordMatches) throw new UnprocessableEntityException({ email: 'These credentials do not match our records.' });
 
     // Create payload
     const userPayload = {
