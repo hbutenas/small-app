@@ -10,6 +10,7 @@ import Button from 'components/auth/Button';
 import Link from 'components/auth/Link';
 import validate from 'utils/validation';
 import Head from 'shared/custom/Head';
+import useRegister from 'services/auth/register';
 
 const fields: TField[] = [
   {
@@ -26,32 +27,49 @@ const fields: TField[] = [
     label: 'Password',
     fieldProps: { type: 'password' },
   },
+  {
+    isRequired: true,
+    type: 'input',
+    name: 'passwordConfirmation',
+    label: 'Password Confirmation',
+    fieldProps: { type: 'password' },
+  },
 ];
 
 const validationSchema = Yup.object().shape({
   email: validate('email'),
   password: validate('password'),
+  passwordConfirmation: validate('password').oneOf(
+    [Yup.ref('password')],
+    'Passwords must match'
+  ),
 });
 
-const Login: NextPageWithLayout = () => {
+const Register: NextPageWithLayout = () => {
+  const { mutate: register, isLoading } = useRegister();
+
   return (
     <Formik
       validationSchema={validationSchema}
-      initialValues={{ email: '', password: '' }}
-      onSubmit={() => {}}
+      initialValues={{ email: '', password: '', passwordConfirmation: '' }}
+      onSubmit={(values) => {
+        register(values);
+      }}
     >
       <Form className="space-y-4">
-        <Head title="Login" description="Login" />
+        <Head title="Register" description="Register" />
         <Fields fields={fields} />
-        <Button>Login</Button>
-        <Link href="/register">New Member?</Link>
+        <Button isLoading={isLoading} disabled={isLoading}>
+          Register
+        </Button>
+        <Link href="/login">Have an Account?</Link>
       </Form>
     </Formik>
   );
 };
 
-Login.getLayout = (page: ReactElement) => (
-  <AuthLayout heading="Login Now!">{page}</AuthLayout>
+Register.getLayout = (page: ReactElement) => (
+  <AuthLayout heading="Register Now!">{page}</AuthLayout>
 );
 
-export default Login;
+export default Register;

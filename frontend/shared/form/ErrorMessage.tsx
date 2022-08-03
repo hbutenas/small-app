@@ -9,7 +9,7 @@ function ErrorMessage({ name }: ErrorMessageProps) {
   return (
     <FormikErrorMessage
       name={name}
-      className="mt-1 text-sm text-danger-700 dark:text-danger-500"
+      className="mt-1 text-sm text-danger-700"
       component="p"
     />
   );
