@@ -7,6 +7,7 @@ import { ConfigService } from '@nestjs/config';
 import { TokensType, User, UserPayloadType } from '../../../auth/types';
 import * as crypto from 'crypto';
 import { MailService } from 'src/mail/mail.service';
+
 @Injectable()
 export class AuthService {
   constructor(private prisma: PrismaService, private jwt: JwtService, private config: ConfigService, private mailService: MailService) {}
@@ -146,7 +147,7 @@ export class AuthService {
 
   public async forgotPassword(body: ForgotPasswordDto) {
     // Find the user
-    const user = await this.prisma['User'].findUnique({
+    const user = await this.prisma.user.findUnique({
       where: {
         email: body.email,
       },
