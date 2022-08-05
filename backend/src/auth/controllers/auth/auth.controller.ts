@@ -1,6 +1,6 @@
-import { Body, Controller, HttpCode, HttpStatus, Post, UseGuards } from '@nestjs/common';
+import { Body, Controller, HttpCode, HttpStatus, Post, Query, UseGuards } from '@nestjs/common';
 import { GetCurrentUser, Public } from 'src/auth/decorators';
-import { ForgotPasswordDto, LoginUserDto, RegisterUserDto } from 'src/auth/dto';
+import { ForgotPasswordDto, LoginUserDto, RegisterUserDto, ResetPasswordDto } from 'src/auth/dto';
 import { RefreshTokenGuard } from 'src/auth/guards';
 import { User } from 'src/auth/types';
 import { ApiTags } from '@nestjs/swagger';
@@ -42,7 +42,14 @@ export class AuthController {
   @Public()
   @Post('forgot-password')
   @HttpCode(HttpStatus.OK)
-  public async forgotPassword(@Body() body: ForgotPasswordDto) {
+  public async forgotPassword(@Body() body: ForgotPasswordDto): Promise<{ message: string }> {
     return this.authService.forgotPassword(body);
+  }
+
+  @Public()
+  @Post('reset-password')
+  @HttpCode(HttpStatus.OK)
+  public async resetPassword(@Body() body: ResetPasswordDto, @Query('token') token: string) {
+    return this.authService.resetPassword(body, token);
   }
 }

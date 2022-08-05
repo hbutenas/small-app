@@ -1,5 +1,5 @@
-import { ForbiddenException, Injectable, InternalServerErrorException, NotFoundException, UnprocessableEntityException } from '@nestjs/common';
-import { RegisterUserDto, LoginUserDto, ForgotPasswordDto } from '../../dto';
+import { BadRequestException, ForbiddenException, Injectable, InternalServerErrorException, NotFoundException, UnprocessableEntityException } from '@nestjs/common';
+import { RegisterUserDto, LoginUserDto, ForgotPasswordDto, ResetPasswordDto } from '../../dto';
 import { PrismaService } from '../../../prisma/prisma.service';
 import * as bcrypt from 'bcrypt';
 import { JwtService } from '@nestjs/jwt';
@@ -145,7 +145,7 @@ export class AuthService {
     return { user: userPayload, tokens };
   }
 
-  public async forgotPassword(body: ForgotPasswordDto) {
+  public async forgotPassword(body: ForgotPasswordDto): Promise<{ message: string }> {
     // Find the user
     const user = await this.prisma.user.findUnique({
       where: {
@@ -168,7 +168,7 @@ export class AuthService {
         data: {
           forgotToken: hashedToken,
           userEmail: body.email,
-          expiresAt: new Date(+new Date() + 60000 * 10),
+          expiresAt: new Date(+new Date() + 60000 * 100), // 1 hour
         },
       });
     } catch (e) {
@@ -176,9 +176,65 @@ export class AuthService {
     }
 
     // Send the email
-    await this.mailService.sendEmail(body.email);
+    await this.mailService.sendEmail(body.email, hashedToken);
 
     // Send a response to client
+    return { message: 'Instructions how to reset password successfully sent' };
+  }
+
+  public async resetPassword(body: ResetPasswordDto, token: string): Promise<boolean> {
+    // Find user by provided token
+    const user = await this.prisma['ForgotPassword'].findFirst({
+      where: {
+        forgotToken: token,
+      },
+    });
+
+    // Couldn't find the user
+    if (!user) throw new NotFoundException('User did not made any request to reset password');
+
+    // Get the dates when was the request to reset password created and when it should expire
+    const createdAt = new Date(user.createdAt);
+    const expiresAt = new Date(user.expiresAt);
+
+    // If it's already expired
+    if (createdAt > expiresAt) {
+      try {
+        // Clear the record
+        await this.prisma['ForgotPassword'].delete({
+          where: {
+            userEmail: user.userEmail,
+          },
+        });
+      } catch (e) {
+        throw new InternalServerErrorException('Something went wrong while deleting user from table... Please try again later');
+      }
+      // Throw error
+      throw new BadRequestException('Token is already expired');
+    }
+
+    // Compare passwords are they correct
+    if (body.password !== body.confirmedPassword) throw new BadRequestException('Passwords does not match');
+
+    // Change password, return true
+    try {
+      // Hash the provided password
+      const hashedPassword = await this.hashData(body.password);
+
+      // Update user
+      await this.prisma['User'].update({
+        where: {
+          email: user.userEmail,
+        },
+        data: {
+          password: hashedPassword,
+        },
+      });
+    } catch (e) {
+      throw new InternalServerErrorException('Something went wrong while resetting the password... Please try again later');
+    }
+
+    return true;
   }
 
   /** Helpers */
