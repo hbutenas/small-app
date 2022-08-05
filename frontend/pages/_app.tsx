@@ -4,6 +4,9 @@ import type { NextPage } from 'next';
 import { ReactElement, ReactNode } from 'react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
+import { SessionProvider } from "next-auth/react"
+
+
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -22,13 +25,15 @@ type AppPropsWithLayout = AppProps & {
   Component: NextPageWithLayout;
 };
 
-function MyApp({ Component, pageProps }: AppPropsWithLayout) {
+function MyApp({ Component, pageProps: { session, ...pageProps }}: AppPropsWithLayout) {
   const getLayout = Component.getLayout ?? ((page: ReactElement) => page);
 
   return (
     <QueryClientProvider client={queryClient}>
-      {getLayout(<Component {...pageProps} />)}
-      <ReactQueryDevtools initialIsOpen={false} position="bottom-right" />
+      <SessionProvider session={session}>
+        {getLayout(<Component {...pageProps} />)}
+        <ReactQueryDevtools initialIsOpen={false} position="bottom-right" />
+      </SessionProvider>
     </QueryClientProvider>
   );
 }

@@ -8,12 +8,18 @@ type TData = {
 };
 
 async function login(data: TData) {
-  const resp = await axios.post('/auth/login', data);
-  return resp.data;
+  if(data !== undefined){
+    const resp = await axios.post('/auth/login', data);
+    return resp;
+  }
+  else{
+    return null
+  }
 }
 
+// Not being used anymore
 function useLogin() {
   return useMutation(login);
 }
 
-export default useLogin;
+export default login;

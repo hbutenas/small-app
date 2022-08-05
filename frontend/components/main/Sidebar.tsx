@@ -7,11 +7,16 @@ import {
   ServerIcon,
   UserGroupIcon,
   ViewBoardsIcon,
+  LogoutIcon
 } from '@heroicons/react/outline';
+
+import {signOut} from "next-auth/react"
+import { MouseEventHandler } from 'react';
 
 interface SideBarProps {
   icon: any;
   text?: string;
+  onClick?: MouseEventHandler<HTMLAnchorElement>,
 }
 
 const Sidebar = () => {
@@ -29,15 +34,18 @@ const Sidebar = () => {
       <SideBarIcon icon={<ChartBarIcon />} text={'Analytics'} />
       <Divider />
       <SideBarIcon icon={<CogIcon />} text={'Settings'} />
+      <SideBarIcon icon={<LogoutIcon />} text={'Logout'} onClick={() => signOut()} />
     </div>
   );
 };
 
 const SideBarIcon = (props: SideBarProps) => (
+  <a onClick={props.onClick !== undefined? props.onClick : () => {}}>
   <div className="sidebar-icon group">
     {props.icon}
     <span className="sidebar-tooltip group-hover:scale-100">{props.text}</span>
   </div>
+  </a>
 );
 
 const Divider = () => <hr className="sidebar-hr" />;

@@ -5,7 +5,6 @@ import * as Yup from 'yup';
 import { NextPageWithLayout } from './_app';
 import { TField } from 'types';
 import { Fields } from 'shared/form';
-import { AxiosError } from 'axios';
 import AuthLayout from 'layouts/AuthLayout';
 import Button from 'components/auth/Button';
 import Link from 'components/auth/Link';
@@ -13,6 +12,10 @@ import validate from 'utils/validation';
 import Head from 'shared/custom/Head';
 import useLogin from '../services/auth/login';
 import { useRouter } from 'next/router';
+
+import { useSession, signIn } from "next-auth/react"
+
+
 
 const fields: TField[] = [
   {
@@ -37,35 +40,40 @@ const validationSchema = Yup.object().shape({
 });
 
 const Login: NextPageWithLayout = () => {
-  const { mutate: login, isLoading } = useLogin();
+  const { data: session, status } = useSession()
   const router = useRouter();
+  const {error} = router.query
+
+  // Logs session stuff
+  // console.log("-----------")
+  // console.log(status)
+  // console.log(session)
+  // console.log("-----------")
+
+  if(status === "authenticated"){
+    window.location.href = "/"
+  }
 
   return (
     <Formik
       validationSchema={validationSchema}
       initialValues={{ email: '', password: '' }}
       onSubmit={(values, { setErrors }) => {
-        login(values, {
-          onSuccess: () => {
-            //    Todo setUser
-            router.push('/');
-          },
-          onError: (error) => {
-            const e = error as AxiosError;
-            if (e.response?.status === 422) {
-              setErrors(e.response.data as object);
-            }
-          },
-        });
+        signIn("credentials", { email: values.email, password:values.password})
       }}
     >
       <Form className="space-y-4">
         <Head title="Login" description="Login" />
         <Fields fields={fields} />
-        <Button isLoading={isLoading} disabled={isLoading}>
+        <Button isLoading={status === "loading"} disabled={status === "loading"}>
           Login
         </Button>
         <Link href="/register">New Member?</Link>
+        {error !== undefined ?  <div className="alert alert-error shadow-lg">
+          <div>
+            <span>Error! Invalid Username/Password.</span>
+          </div>
+        </div> : <></>}
       </Form>
     </Formik>
   );
