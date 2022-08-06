@@ -19,7 +19,9 @@ export class MailService {
         </p> `, // HTML body content
       });
     } catch (e) {
-      throw new InternalServerErrorException('Something went wrong while sending the email... Please try again later');
+      throw new InternalServerErrorException(
+        'Something went wrong while sending the email... Please try again later',
+      );
     }
   }
 }

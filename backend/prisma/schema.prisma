@@ -14,15 +14,12 @@ model User {
   id Int @id @default(autoincrement())
 
   // Required
+  name     String
   email    String @unique
   password String
-  username String // will be auto generated from the part before the email @ sign + random strings
-
-  // Optional
-  refreshToken String?
 
   // Relation
-  forgotpasswords ForgotPassword[]
+  forgotPasswords ForgotPassword[]
 
   // Timestamps
   createdAt DateTime @default(now())
@@ -35,15 +32,15 @@ model ForgotPassword {
   id Int @id @default(autoincrement())
 
   // Required
-  forgotToken String
+  token String
 
-  // Relation 
-  userEmail String
-  user      User   @relation(fields: [userEmail], references: [email], onDelete: Cascade)
+  // Relation
+  email String
+  user  User   @relation(fields: [email], references: [email], onDelete: Cascade)
 
   // Timestamps
   createdAt DateTime @default(now())
   expiresAt DateTime
 
-  @@map("forgotpasswords")
+  @@map("forgot_passwords")
 }

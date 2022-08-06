@@ -2,12 +2,8 @@ import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import { Test, TestingModule } from '@nestjs/testing';
 import { RegisterUserDto } from 'src/auth/dto';
-import { User } from 'src/auth/types';
-import { PrismaService } from '../../../prisma/prisma.service';
+import { PrismaService } from 'src/prisma/prisma.service';
 import { AuthService } from './auth.service';
-
-// email is the  unique key
-// will use email as the key to find the user
 
 describe('AuthService', () => {
   let service: AuthService;
@@ -17,7 +13,9 @@ describe('AuthService', () => {
   const mockPrismaService = {
     User: {
       findUnique: jest.fn((params) => {
-        const i = mockUserDatabase.findIndex((user) => user.email === params.where.email);
+        const i = mockUserDatabase.findIndex(
+          (user) => user.email === params.where.email,
+        );
         if (i === -1) return null;
         return mockUserDatabase[i];
       }),
@@ -29,7 +27,9 @@ describe('AuthService', () => {
         return user;
       }),
       update: jest.fn((params) => {
-        const i = mockUserDatabase.findIndex((user) => user.email === params.where.email);
+        const i = mockUserDatabase.findIndex(
+          (user) => user.email === params.where.email,
+        );
         if (i === -1) return null;
         mockUserDatabase[i] = {
           ...mockUserDatabase[i],
@@ -70,17 +70,19 @@ describe('AuthService', () => {
 
   it('should register user', async () => {
     const mockUserDTO: RegisterUserDto = {
+      name: 'John Doe',
       email: 'user1@gmail.com',
       password: 'user1password',
     };
 
-    const user: User = await service.register(mockUserDTO);
+    const user = await service.register(mockUserDTO);
     console.log(mockUserDatabase);
     expect(user).toBeDefined();
   });
 
   it('should not register existing user', async () => {
     const mockUserDTO: RegisterUserDto = {
+      name: 'John Doe',
       email: 'user1@gmail.com',
       password: 'user1password',
     };
@@ -90,26 +92,22 @@ describe('AuthService', () => {
 
   it('should login user', async () => {
     const mockUserDTO: RegisterUserDto = {
+      name: 'John Doe',
       email: 'user1@gmail.com',
       password: 'user1password',
     };
 
-    const user: User = await service.login(mockUserDTO);
+    const user = await service.login(mockUserDTO);
     expect(user).toBeDefined();
   });
 
   it('should not login user', async () => {
     const mockUserDTO: RegisterUserDto = {
+      name: 'John Doe',
       email: 'user1@gmail.com',
       password: 'wrong password',
     };
 
     await expect(service.login(mockUserDTO)).rejects.toThrow();
-  });
-
-  it('should logout user', () => {
-    const isLoggedOut = service.logout('user1@gmail.com');
-    expect(mockUserDatabase[0].refreshToken).toBeNull();
-    expect(isLoggedOut).toBeTruthy();
   });
 });
