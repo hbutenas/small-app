@@ -18,6 +18,13 @@ const fields: TField[] = [
   {
     isRequired: true,
     type: 'input',
+    name: 'name',
+    label: 'Name',
+    fieldProps: { type: 'text' },
+  },
+  {
+    isRequired: true,
+    type: 'input',
     name: 'email',
     label: 'Email',
     fieldProps: { type: 'email' },
@@ -39,6 +46,7 @@ const fields: TField[] = [
 ];
 
 const validationSchema = Yup.object().shape({
+  name : validate('common'),
   email: validate('email'),
   password: validate('password'),
   passwordConfirmation: validate('password').oneOf(
@@ -54,7 +62,7 @@ const Register: NextPageWithLayout = () => {
   return (
     <Formik
       validationSchema={validationSchema}
-      initialValues={{ email: '', password: '', passwordConfirmation: '' }}
+      initialValues={{ name : '',email: '', password: '', passwordConfirmation: '' }}
       onSubmit={(values, { setErrors }) => {
         register(values, {
           onSuccess: () => {
