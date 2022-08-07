@@ -1,5 +1,5 @@
 import { ValidationError } from 'class-validator';
-import { ValidationErrorException } from 'src/common/exception/validation.exception';
+import { ValidationErrorException } from 'common/exception/validation.exception';
 
 export const transformValidationErrors = (e: ValidationError[]) => {
   const errors = e.reduce((acc, curr) => {

@@ -15,7 +15,7 @@ import * as bcrypt from 'bcrypt';
 import { JwtService } from '@nestjs/jwt';
 import * as crypto from 'crypto';
 import { MailService } from 'src/mail/mail.service';
-import { ValidationErrorException } from 'src/common/exception/validation.exception';
+import { ValidationErrorException } from 'common/exception/validation.exception';
 import { User } from '@prisma/client';
 import { PrismaService } from 'src/prisma/prisma.service';
 
