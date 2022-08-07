@@ -1,39 +1,59 @@
 import NextAuth, { NextAuthOptions } from 'next-auth';
 import CredentialsProvider from 'next-auth/providers/credentials';
 import login from '../../../services/auth/login';
+import refresh from '../../../services/auth/refresh'
 
 export const authOptions: NextAuthOptions = {
   callbacks: {
-    async jwt({ token, account, user }) {
-      console.log(token);
+    async jwt({ token, user }) {
+      
       if (user && token) {
         token.dbAccessToken = user.accessToken;
         token.dbRefreshToken = user.refreshToken;
+        token.name = user.name;
+        token.accessTokenExpires = user.accessTokenExpires
 
-        if (Date.now() < token.exp) {
-          return token;
-        }
       }
 
-      // Check if need a refresh token
-      // Docs: https://next-auth.js.org/tutorials/refresh-token-rotation
+      if(token){
 
+        // @ts-ignore
+        if (Date.now() < token.accessTokenExpires) {
+          return token;
+        }
+        else{
+          var values = {
+            token: token.dbRefreshToken
+          }
+          const response = await refresh(values);
+          if(response !== null){
+            token.dbAccessToken = response.data.accessToken;
+            token.dbRefreshToken = response.data.refreshToken;
+            token.accessTokenExpires = Date.now() + 900000  // 900000MS is 15 Mins
+            console.log("REFRESHED")
+            return token
+          }
+          else{
+            return {
+             ... token,
+              error: "RefreshAccessTokenError"
+            }
+          }
+        }
+      }
       return token;
     },
     async session({ session, token, user }) {
       if (token) {
         session.dbAccessToken = token.dbAccessToken;
         session.dbRefreshToken = token.dbRefreshToken;
+        session.name = token.name;
+        session.accessTokenExpires = token.accessTokenExpires
+
       }
 
       return session;
     },
-  },
-  jwt: {
-    maxAge: 900,
-  },
-  session: {
-    maxAge: 900,
   },
   pages: {
     error: '/login',
@@ -50,6 +70,7 @@ export const authOptions: NextAuthOptions = {
       },
       async authorize(credentials, req) {
         if (credentials !== undefined) {
+
           const values = {
             email: credentials.email,
             password: credentials.password,
@@ -61,10 +82,12 @@ export const authOptions: NextAuthOptions = {
             if (response.status !== 422) {
               var user = {
                 id: response.data.user.id,
-                name: response.data.user.username,
+                name: response.data.user.name,
                 email: response.data.user.email,
-                accessToken: response.data.tokens.accessToken,
-                refreshToken: response.data.tokens.refreshToken,
+                accessToken: response.data.accessToken,
+                refreshToken: response.data.refreshToken,
+                accessTokenExpires: Date.now() + 900000,      // 900000MS is 15 Mins
+
               };
               return user;
             } else {
@@ -81,32 +104,3 @@ export const authOptions: NextAuthOptions = {
   ],
 };
 export default NextAuth(authOptions);
-
-
-
-// Test code for refresh token
-
-// async function refreshAccessToken(token) {
-//   try {
-
-//     const refreshedTokens = await response.json()
-
-//     if (!response.ok) {
-//       throw refreshedTokens
-//     }
-
-//     return {
-//       ...token,
-//       accessToken: refreshedTokens.access_token,
-//       accessTokenExpires: Date.now() + refreshedTokens.expires_at * 1000,
-//       refreshToken: refreshedTokens.refresh_token ?? token.refreshToken, // Fall back to old refresh token
-//     }
-//   } catch (error) {
-//     console.log(error)
-
-//     return {
-//       ...token,
-//       error: "RefreshAccessTokenError",
-//     }
-//   }
-// }

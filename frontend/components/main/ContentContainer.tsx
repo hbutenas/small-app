@@ -11,11 +11,17 @@ interface containerProps {
 const ContentContainer = (props: containerProps) => {
   const { data: session, status } = useSession();
 
+  // On status or session changes
   useEffect(() => {
+    // Checks to see if there is an error with the refresh token
+    if(session?.error === "RefreshAccessTokenError"){
+      Router.push('/login');
+    }
+    // Otherwise it will check to see if the user is authenticated (could be improved by checking is status is === "unauthenticated")
     if (status !== 'authenticated' && status !== 'loading') {
       Router.push('/login');
     }
-  }, [status]);
+  }, [status, session]);
 
 
 
