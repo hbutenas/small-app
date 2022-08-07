@@ -1,6 +1,8 @@
 import React, { ReactElement } from 'react';
 import { Form, Formik } from 'formik';
+import { useRouter } from 'next/router';
 import * as Yup from 'yup';
+import { useSession, signIn } from 'next-auth/react';
 
 import { NextPageWithLayout } from './_app';
 import { TField } from 'types';
@@ -10,12 +12,6 @@ import Button from 'components/auth/Button';
 import Link from 'components/auth/Link';
 import validate from 'utils/validation';
 import Head from 'shared/custom/Head';
-import useLogin from '../services/auth/login';
-import { useRouter } from 'next/router';
-
-import { useSession, signIn } from "next-auth/react"
-
-
 
 const fields: TField[] = [
   {
@@ -40,40 +36,37 @@ const validationSchema = Yup.object().shape({
 });
 
 const Login: NextPageWithLayout = () => {
-  const { data: session, status } = useSession()
+  const { status } = useSession();
   const router = useRouter();
-  const {error} = router.query
+  const { error } = router.query;
 
-  // Logs session stuff
-  // console.log("-----------")
-  // console.log(status)
-  // console.log(session)
-  // console.log("-----------")
-
-  if(status === "authenticated"){
-    window.location.href = "/"
-  }
+  if (status === 'authenticated') router.replace('/');
 
   return (
     <Formik
       validationSchema={validationSchema}
       initialValues={{ email: '', password: '' }}
       onSubmit={(values, { setErrors }) => {
-        signIn("credentials", { email: values.email, password:values.password})
+        signIn('credentials', values);
       }}
     >
       <Form className="space-y-4">
         <Head title="Login" description="Login" />
         <Fields fields={fields} />
-        <Button isLoading={status === "loading"} disabled={status === "loading"}>
+        <Button
+          isLoading={status === 'loading'}
+          disabled={status === 'loading'}
+        >
           Login
         </Button>
         <Link href="/register">New Member?</Link>
-        {error !== undefined ?  <div className="alert alert-error shadow-lg">
-          <div>
-            <span>Error! Invalid Username/Password.</span>
+        {error && (
+          <div className="alert alert-error shadow-lg">
+            <div>
+              <span>These Credentials doesn&apos;t match our records.</span>
+            </div>
           </div>
-        </div> : <></>}
+        )}
       </Form>
     </Formik>
   );

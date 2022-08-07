@@ -1,6 +1,8 @@
 import React, { ReactElement } from 'react';
 import { Form, Formik } from 'formik';
 import * as Yup from 'yup';
+import { AxiosError } from 'axios';
+import { useRouter } from 'next/router';
 
 import { NextPageWithLayout } from './_app';
 import { TField } from 'types';
@@ -11,8 +13,6 @@ import Link from 'components/auth/Link';
 import validate from 'utils/validation';
 import Head from 'shared/custom/Head';
 import useRegister from 'services/auth/register';
-import { AxiosError } from 'axios';
-import { useRouter } from 'next/router';
 
 const fields: TField[] = [
   {
@@ -46,7 +46,7 @@ const fields: TField[] = [
 ];
 
 const validationSchema = Yup.object().shape({
-  name : validate('common'),
+  name: validate('common'),
   email: validate('email'),
   password: validate('password'),
   passwordConfirmation: validate('password').oneOf(
@@ -62,7 +62,12 @@ const Register: NextPageWithLayout = () => {
   return (
     <Formik
       validationSchema={validationSchema}
-      initialValues={{ name : '',email: '', password: '', passwordConfirmation: '' }}
+      initialValues={{
+        name: '',
+        email: '',
+        password: '',
+        passwordConfirmation: '',
+      }}
       onSubmit={(values, { setErrors }) => {
         register(values, {
           onSuccess: () => {
@@ -71,8 +76,9 @@ const Register: NextPageWithLayout = () => {
           },
           onError: (error) => {
             const e = error as AxiosError;
-            if (e.response?.status === 400) {
-              setErrors(e.response.data as object);
+            if (e.response?.status === 422) {
+              const data = e.response.data as any;
+              setErrors(data.errors);
             }
           },
         });
