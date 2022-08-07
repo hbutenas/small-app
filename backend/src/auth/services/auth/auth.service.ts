@@ -88,9 +88,9 @@ export class AuthService {
       const user = await this.prisma.user.findUnique({
         where: { id: token.sub },
       });
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      const { refreshToken, ...rest } = this.generateTokens(user);
-      return rest;
+
+      const tokens = this.generateTokens(user);
+      return { ...tokens, refreshToken: refreshTokenDto.token };
     } catch (e) {
       // token is not signed by us
       throw new UnauthorizedException();

@@ -15,7 +15,7 @@ import {
   RegisterUserDto,
   ResetPasswordDto,
 } from 'src/auth/dto';
-import { ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { AuthService } from '../../services/auth/auth.service';
 import { Public } from 'src/auth/decorators';
 import { User } from '@prisma/client';
@@ -63,6 +63,7 @@ export class AuthController {
     return this.authService.resetPassword(body, token);
   }
 
+  @ApiBearerAuth()
   @Get('me')
   @HttpCode(HttpStatus.OK)
   public me(@Req() req) {
