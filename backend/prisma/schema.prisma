@@ -20,6 +20,7 @@ model User {
 
   // Relation
   forgotPasswords ForgotPassword[]
+  projects        Project[]
 
   // Timestamps
   createdAt DateTime @default(now())
@@ -43,4 +44,19 @@ model ForgotPassword {
   expiresAt DateTime
 
   @@map("forgot_passwords")
+}
+
+model Project {
+  id Int @id @default(autoincrement())
+
+  name        String
+  description String?
+
+  userId Int
+  user   User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("projects")
 }
