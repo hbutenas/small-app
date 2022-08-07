@@ -13,6 +13,8 @@ import Link from 'components/auth/Link';
 import validate from 'utils/validation';
 import Head from 'shared/custom/Head';
 import useRegister from 'services/auth/register';
+import { useSession } from 'next-auth/react';
+
 
 const fields: TField[] = [
   {
@@ -57,7 +59,10 @@ const validationSchema = Yup.object().shape({
 
 const Register: NextPageWithLayout = () => {
   const { mutate: register, isLoading } = useRegister();
+  const { status } = useSession();
   const router = useRouter();
+
+  if (status === 'authenticated') router.replace('/');
 
   return (
     <Formik
@@ -70,10 +75,6 @@ const Register: NextPageWithLayout = () => {
       }}
       onSubmit={(values, { setErrors }) => {
         register(values, {
-          onSuccess: () => {
-            //    Todo setUser
-            router.push('/');
-          },
           onError: (error) => {
             const e = error as AxiosError;
             if (e.response?.status === 422) {

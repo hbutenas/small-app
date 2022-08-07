@@ -47,6 +47,9 @@ export const authOptions: NextAuthOptions = {
       return session;
     },
   },
+  jwt : {
+    maxAge: 900 
+  },
   pages: {
     error: '/login',
     signIn: '/login',
